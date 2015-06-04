@@ -17,8 +17,6 @@ static void *state = (void *)@"state";
     }
     [self setFireDate:[NSDate distantFuture]]; //如果给我一个期限，我希望是4001-01-01 00:00:00 +0000
 }
-
-
 -(void)resume
 {
     if (![self isValid]) {
@@ -34,5 +32,4 @@ static void *state = (void *)@"state";
 {
     objc_setAssociatedObject(self, state, s, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-
 @end
