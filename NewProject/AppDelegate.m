@@ -20,4 +20,9 @@
     [self.window makeKeyAndVisible];
     return YES;
 }
+-(void)applicationDidBecomeActive:(UIApplication *)application
+{
+    // 发出通知，继续扫描
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"notice_reStartScan" object:nil];
+}
 @end

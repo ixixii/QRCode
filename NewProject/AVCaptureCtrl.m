@@ -9,6 +9,8 @@
 
 #import "AVCaptureCtrl.h"
 #import <AVFoundation/AVFoundation.h>
+#import "UIAlertView+Block.h"
+#import "NSTimer+Pause.h"
 @interface AVCaptureCtrl ()<AVCaptureMetadataOutputObjectsDelegate>
 {
     // 扫描线条的y坐标
@@ -42,10 +44,12 @@
     [backBtn addTarget:self action:@selector(backBtnClicked) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:backBtn];
     
+    
     // 顶部的提示语句
     UILabel * hintLabel= [[UILabel alloc] initWithFrame:CGRectMake(15, 40, 290, 50)];
     hintLabel.backgroundColor = [UIColor clearColor];
     hintLabel.numberOfLines=2;
+    hintLabel.tag = 5267;
     hintLabel.textColor=[UIColor whiteColor];
     hintLabel.text=@"将二维码图像置于矩形方框内，离手机摄像头10CM左右，系统会自动识别。";
     [self.view addSubview:hintLabel];
@@ -65,10 +69,13 @@
     
     timer = [NSTimer scheduledTimerWithTimeInterval:.02 target:self selector:@selector(lineAnimation) userInfo:nil repeats:YES];
     
-   
-
-
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(resumeScan) name:@"notice_reStartScan" object:nil];
 }
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
+}
+
 #pragma mark 扫描动画效果
 -(void)lineAnimation
 {
@@ -151,18 +158,59 @@
     
     if ([metadataObjects count] >0)
     {
+        
         AVMetadataMachineReadableCodeObject * metadataObject = [metadataObjects objectAtIndex:0];
         stringValue = metadataObject.stringValue;
+        // 重要！释放会话
+        [_session stopRunning];
+        [timer pause];
+        timer.state = @"pause";
+        
+        
+        UILabel *hintLabel = (UILabel *)[self.view viewWithTag:5267];
+        hintLabel.text = stringValue;
+        // 是否打开：
+        UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:@"风险提示" message:@"您确定要打开该网页吗？" delegate:nil cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+        alertView.confirmBlock = ^(){
+            // 调用父类的返回
+            [self openUrl:stringValue];
+        };
+        alertView.cancelBlock = ^(){
+            [self resumeScan];
+        };
+
+        [alertView show];
     }
-    // 重要！释放会话
-    [_session stopRunning];
+
+    return;
+
    [self dismissViewControllerAnimated:YES completion:^
     {
-        [timer invalidate];
         NSLog(@"%@",stringValue);
     }];
 }
 
 
+- (void)resumeScan
+{
+    
+    if ([timer.state isEqualToString:@"pause"]) {
+        // 重要！释放会话
+        [_session startRunning];
+        [timer resume];
+    }
+}
+- (void)openUrl:(NSString *)url
+{
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+}
+
+// 仅适合于打电话，打开应用等
+- (void)openUrl2:(NSString *)url
+{   UIWebView *webView = [[UIWebView alloc]initWithFrame:CGRectMake(0, 0, 0, 0)];
+    [self.view addSubview:webView];
+    webView.userInteractionEnabled = true;
+    [webView loadRequest:[ [ NSURLRequest alloc] initWithURL:[ [ NSURL alloc] initWithString:url] ] ];
+}
 
 @end

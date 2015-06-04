@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>ACD2CFD6-6271-46A0-B867-179A035C2705</string>
 	<key>IDESourceControlProjectName</key>
-	<string>NewProject</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>C54D363F02597BD4855BD0760329821C7391E86A</key>
 		<string>https://github.com/ixixii/QRCode.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>NewProject.xcodeproj</string>
+	<string>NewProject.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>C54D363F02597BD4855BD0760329821C7391E86A</key>
