@@ -26,28 +26,37 @@
 @end
 
 @implementation AVCaptureCtrl
+#pragma mark - 生命周期
+-(void)viewWillAppear:(BOOL)animated
+{
+    [self coreConfig];
+}
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor grayColor];
-	UIButton * scanButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [scanButton setTitle:@"取消" forState:UIControlStateNormal];
-    scanButton.frame = CGRectMake(100, 420, 120, 40);
-    [scanButton addTarget:self action:@selector(backAction) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:scanButton];
+    self.view.backgroundColor = [UIColor purpleColor];
+    // 返回按钮
+	UIButton * backBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [backBtn setTitle:@"取消" forState:UIControlStateNormal];
+    backBtn.frame = CGRectMake(100, 420, 120, 40);
+    [backBtn addTarget:self action:@selector(backBtnClicked) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:backBtn];
     
-    UILabel * labIntroudction= [[UILabel alloc] initWithFrame:CGRectMake(15, 40, 290, 50)];
-    labIntroudction.backgroundColor = [UIColor clearColor];
-    labIntroudction.numberOfLines=2;
-    labIntroudction.textColor=[UIColor whiteColor];
-    labIntroudction.text=@"将二维码图像置于矩形方框内，离手机摄像头10CM左右，系统会自动识别。";
-    [self.view addSubview:labIntroudction];
+    // 顶部的提示语句
+    UILabel * hintLabel= [[UILabel alloc] initWithFrame:CGRectMake(15, 40, 290, 50)];
+    hintLabel.backgroundColor = [UIColor clearColor];
+    hintLabel.numberOfLines=2;
+    hintLabel.textColor=[UIColor whiteColor];
+    hintLabel.text=@"将二维码图像置于矩形方框内，离手机摄像头10CM左右，系统会自动识别。";
+    [self.view addSubview:hintLabel];
     
     
-    UIImageView * imageView = [[UIImageView alloc]initWithFrame:CGRectMake(10, 100, 300, 300)];
-    imageView.image = [UIImage imageNamed:@"pick_bg"];
-    [self.view addSubview:imageView];
+    // 300*300的选景框
+    UIImageView * bigBgImgView = [[UIImageView alloc]initWithFrame:CGRectMake(10, 100, 300, 300)];
+    bigBgImgView.image = [UIImage imageNamed:@"pick_bg"];
+    [self.view addSubview:bigBgImgView];
     
+    // 绿色扫描线：初始位置和动画方向
     isGoUp = NO;
     lineYPos =0;
     _lineImgView = [[UIImageView alloc] initWithFrame:CGRectMake(50, 110, 220, 2)];
@@ -60,6 +69,7 @@
 
 
 }
+#pragma mark 扫描动画效果
 -(void)lineAnimation
 {
     if (isGoUp == NO) {
@@ -78,16 +88,14 @@
     }
 
 }
--(void)backAction
+#pragma mark 返回按钮点击事件
+-(void)backBtnClicked
 {
     [self dismissViewControllerAnimated:YES completion:^{
         [timer invalidate];
     }];
 }
--(void)viewWillAppear:(BOOL)animated
-{
-    [self coreConfig];
-}
+
 #pragma mark - 核心配置代码
 - (void)coreConfig
 {
@@ -103,19 +111,23 @@
     
     // Session
     _session = [[AVCaptureSession alloc]init];
+    // AVCaptureSession 可以设置 sessionPreset 属性，这个决定了视频输入每一帧图像质量的大小。
     [_session setSessionPreset:AVCaptureSessionPresetHigh];
     if ([_session canAddInput:self.input]){
+        // 为会话设置input
         [_session addInput:self.input];
     }
     
     if ([_session canAddOutput:self.output]){
+        // 为会放设置output
         [_session addOutput:self.output];
     }
     
     // 条码类型 AVMetadataObjectTypeQRCode
+    // metadataObjectTypes属性非常重要，因为它的值会被用来判定整个应用程序对哪类元数据感兴趣。在这里我们将它指定为AVMetadataObjectTypeQRCode。
     _output.metadataObjectTypes =@[AVMetadataObjectTypeQRCode];
     
-    // Preview
+    // Preview，最后，通过会话 创建 AVCaptureVideoPreviewLayer，并添加到self.view 展示
     _preview =[AVCaptureVideoPreviewLayer layerWithSession:self.session];
     _preview.videoGravity = AVLayerVideoGravityResizeAspectFill;
     _preview.frame =CGRectMake(20,110,280,280);
@@ -124,9 +136,16 @@
     // Start
     [_session startRunning];
 }
-#pragma mark AVCaptureMetadataOutputObjectsDelegate
+#pragma mark - AVCaptureMetadataOutputObjectsDelegate
+// 核心方法
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection
 {
+    /**
+     (lldb) po metadataObjects
+     <__NSArrayM 0x14db69a0>(
+     <AVMetadataMachineReadableCodeObject: 0x14db2500> type "org.iso.QRCode", bounds { 0.4,0.2 0.3x0.6 }, corners { 0.4,0.9 0.8,0.9 0.8,0.3 0.4,0.2 }, time 322767896792333, stringValue "adsfa爱迪生发"
+     )
+     */
    
     NSString *stringValue;
     
@@ -135,7 +154,7 @@
         AVMetadataMachineReadableCodeObject * metadataObject = [metadataObjects objectAtIndex:0];
         stringValue = metadataObject.stringValue;
     }
-    
+    // 重要！释放会话
     [_session stopRunning];
    [self dismissViewControllerAnimated:YES completion:^
     {
