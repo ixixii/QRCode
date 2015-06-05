@@ -9,7 +9,7 @@
 #import "UIAlertView+Block.h"
 #import <objc/runtime.h>
 @implementation UIAlertView(Block)
-- (void)setCancelBlock:(ConfirmBlock)cancelBlock
+- (void)setCancelBlock:(DoneBlock)cancelBlock
 {
     objc_setAssociatedObject(self, @selector(cancelBlock), cancelBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
     if (cancelBlock == NULL) {
@@ -19,7 +19,7 @@
         self.delegate = self;
     }
 }
-- (void)setConfirmBlock:(ConfirmBlock)confirmBlock
+- (void)setConfirmBlock:(DoneBlock)confirmBlock
 {
     objc_setAssociatedObject(self, @selector(confirmBlock), confirmBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
     if (confirmBlock == NULL) {
@@ -30,11 +30,11 @@
     }
 }
 
-- (ConfirmBlock)confirmBlock
+- (DoneBlock)confirmBlock
 {
     return objc_getAssociatedObject(self, @selector(confirmBlock));
 }
-- (ConfirmBlock)cancelBlock
+- (DoneBlock)cancelBlock
 {
     return objc_getAssociatedObject(self, @selector(cancelBlock));
 }

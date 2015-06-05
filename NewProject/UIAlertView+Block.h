@@ -8,14 +8,14 @@
 
 #import <UIKit/UIKit.h>
 typedef void (^UIAlertViewBlock)(UIAlertView *alertView, NSInteger buttonIndex);
-typedef void (^ConfirmBlock)(void);
+typedef void (^DoneBlock)(void);
 @interface UIAlertView(Block) <UIAlertViewDelegate>
-@property (nonatomic,copy)ConfirmBlock confirmBlock;
-@property (nonatomic,copy)ConfirmBlock cancelBlock;
+@property (nonatomic,copy)DoneBlock confirmBlock;
+@property (nonatomic,copy)DoneBlock cancelBlock;
 
 // 必须手动用运行时绑定方法
-- (void)setConfirmBlock:(ConfirmBlock)confirmBlock;
-- (void)setCancelBlock:(ConfirmBlock)cancelBlock;
-- (ConfirmBlock)confirmBlock;
-- (ConfirmBlock)cancelBlock;
+- (void)setConfirmBlock:(DoneBlock)confirmBlock;
+- (void)setCancelBlock:(DoneBlock)cancelBlock;
+- (DoneBlock)confirmBlock;
+- (DoneBlock)cancelBlock;
 @end
