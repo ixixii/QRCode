@@ -1,5 +1,5 @@
 # QRCode
-二维码扫描
+二维码扫描_64bit
 ##QQ邮箱帐号信息
 QQ邮箱帐号：iOS_swift@qq.com      (对应QQ号码：1625465730)
 
